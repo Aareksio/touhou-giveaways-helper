@@ -31,9 +31,7 @@ if (/steamgifts\.com/.exec(window.location.href)) {
     removeFromArray(current_path, "");
 }
 
-if (!current_path) {
-    // Not SteamGifts page, the browser fucked up...
-} else {
+if (current_path) {
     initializeTouhouHelper();
 
     if (current_path.length === 0) { // Homepage
@@ -135,15 +133,13 @@ function updateTouhouBar(msg) {
 function updateTouhouGiveaways() {
     $('.giveaway__row-outer-wrap').each(function(index, giveaway) {
         let giveawayId = /\/giveaway\/([A-Za-z0-9]+)\//.exec($('.giveaway__heading__name', giveaway).attr('href'));
-        if (giveawayId) {
-            giveawayId = giveawayId[1];
-        } else {
+        if (!giveawayId) {
             return;
         }
+        giveawayId = giveawayId[1];
+
         if (GIVEAWAYS_DATA.hasOwnProperty(giveawayId)) {
-            $('.giveaway__columns', giveaway).append('<div class="touhou_giveaway_points' + (GIVEAWAYS_DATA[giveawayId][0].value > USER_DATA.points_allowed ? ' touhou_no_enter' : '') + '"><span title="TouhouValue: ' + GIVEAWAYS_DATA[giveawayId][0].value + '"><i class="fa fa-jpy"></i>' + GIVEAWAYS_DATA[giveawayId][0].value + '</span></div>');
-        } else {
-            return;
+            $('.giveaway__column--width-fill', giveaway).after('<div class="touhou_giveaway_points' + (GIVEAWAYS_DATA[giveawayId][0].value > USER_DATA.points_allowed ? ' touhou_no_enter' : '') + '"><span title="TouhouValue: ' + GIVEAWAYS_DATA[giveawayId][0].value + '"><i class="fa fa-jpy"></i>' + GIVEAWAYS_DATA[giveawayId][0].value + '</span></div>');
         }
     });
 }
@@ -167,18 +163,21 @@ function giveawayNew() {
         $("div[data-group-id='" + GROUP_ID + "']").trigger("click");
     };
 
+    let applyDescription = function() {
+        let description = '###TouhouValue: Default\n';
+        let newDesc = description + $("textarea[name='description']").val().replace(description, "");
+        $("textarea[name='description']").val(newDesc);
+    };
+
     $("#dateBtn").click(function() {
         applyDates();
         applyRegionRestrictions();
         applyGroup();
+        applyDescription();
     });
 }
 
 /* Helpers */
-function log(msg) {
-    console.log('[Touhou Giveaways Helper] ' + msg);
-}
-
 function removeFromArray(arr, item) {
     for (let i = arr.length; i--;) {
         if (arr[i] === item) {
@@ -196,12 +195,12 @@ function formatDate(date) {
     let ampm = '';
     if (hours < 12) {
         ampm = 'am';
-        if (hours == 0) {
+        if (hours === 0) {
             hours = 12;
         }
     } else {
         ampm = 'pm';
-        if (hours != 12) {
+        if (hours !== 12) {
             hours = hours % 12;
         }
     }
@@ -229,13 +228,11 @@ function saveGiveawaysData() {
 
 function generateTouhouData(withData) {
     let touhouData = '<p class="touhou_data">';
-
     if (withData) {
         touhouData += '<b><a href="' + TOUHOU_SITE + 'user/' + USER_ID + '/profile" target="_blank">' + USER_DATA.nickname + '</a></b> (' + USER_DATA.points_allowed + 'p)';
     } else {
         touhouData += 'Loading data...';
     }
-
     touhouData += '</p>';
 
     return touhouData;
