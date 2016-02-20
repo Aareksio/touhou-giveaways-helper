@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         Touhou Giveaways Helper
 // @namespace    https://touhou.justarchi.net/
-// @version      0.1
+// @version      1.01
 // @description  Makes your life easier!
-// @author       Touhou Engineers
+// @author       Mole & Archi
 // @match        http://www.steamgifts.com/*
 // @grant        none
 // @run-at       document-end
@@ -164,7 +164,7 @@ function giveawayNew() {
     };
 
     let applyDescription = function() {
-        let description = '###TouhouValue: Default\n';
+        let description = '### TouhouValue: Default\n';
         let newDesc = description + $("textarea[name='description']").val().replace(description, "");
         $("textarea[name='description']").val(newDesc);
     };
@@ -229,7 +229,7 @@ function saveGiveawaysData() {
 function generateTouhouData(withData) {
     let touhouData = '<p class="touhou_data">';
     if (withData) {
-        touhouData += '<b><a href="' + TOUHOU_SITE + 'user/' + USER_ID + '/profile" target="_blank">' + USER_DATA.nickname + '</a></b> (' + USER_DATA.points_allowed + 'p)';
+        touhouData += '<b><a href="' + TOUHOU_SITE + 'user/' + USER_ID + '/profile" target="_blank">' + USER_DATA.nickname + '</a></b> (<i class="fa fa-jpy"></i>' + USER_DATA.points_allowed + ')';
     } else {
         touhouData += 'Loading data...';
     }
