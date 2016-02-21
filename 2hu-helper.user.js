@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Touhou Giveaways Helper
 // @namespace    https://touhou.justarchi.net/
-// @version      1.011
+// @version      1.012
 // @description  Makes your life easier!
 // @author       Mole & Archi
 // @match        http://www.steamgifts.com/*
@@ -50,7 +50,7 @@ if (current_path) {
 
 /* Functions */
 function initializeTouhouHelper() {
-    let css = '.touhou_info_container{background-color:#1e202b;color:#c7c7c7;font:700 12px/22px Arial,sans-serif;border-top:1px solid;border-bottom:1px solid;border-color:#101015}.touhou_info_container_fixed{position:fixed;width:100%;z-index:1}';
+    let css = '.touhou_info_container{background-color:#1e202b;color:#c7c7c7;font:700 12px/22px Arial,sans-serif;border-top:1px solid;border-bottom:1px solid;border-color:#101015}.touhou_info_container_fixed{position:fixed;width:100%;z-index:1; top:39px}';
     let head = document.getElementsByTagName('head')[0];
     if (!head) { return; }
     let style = document.createElement('style');
@@ -140,7 +140,7 @@ function updateTouhouGiveaways() {
         giveawayId = giveawayId[1];
 
         if (GIVEAWAYS_DATA.hasOwnProperty(giveawayId)) {
-            $('.giveaway__column--width-fill', giveaway).after('<div class="touhou_giveaway_points' + (GIVEAWAYS_DATA[giveawayId][0].value > USER_DATA.points_allowed ? ' giveaway__column--contributor-level--negative' : '') + '"><span title="TouhouValue: ' + GIVEAWAYS_DATA[giveawayId][0].value + '"><i class="fa fa-jpy"></i>' + GIVEAWAYS_DATA[giveawayId][0].value + '</span></div>');
+            $('.giveaway__column--width-fill', giveaway).after('<div class="touhou_giveaway_points' + (GIVEAWAYS_DATA[giveawayId][0].value > USER_DATA.points_allowed ? ' giveaway__column--contributor-level--negative' : ' giveaway__column--region-restricted') + '"><span title="TouhouValue: ' + GIVEAWAYS_DATA[giveawayId][0].value + '"><i class="fa fa-jpy"></i>' + GIVEAWAYS_DATA[giveawayId][0].value + '</span></div>');
         }
     });
 }
@@ -182,6 +182,7 @@ function fixFuckups() {
     console.log('Fixing fuckups!');
     if ($('header').css('position') === 'fixed') {
         $('.touhou_info_container').addClass('touhou_info_container_fixed');
+        $('body').css('padding-top', '25px');
     }
 }
 
