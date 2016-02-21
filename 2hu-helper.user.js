@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Touhou Giveaways Helper
 // @namespace    https://touhou.justarchi.net/
-// @version      1.017
+// @version      1.018
 // @description  Makes your life easier!
 // @author       Mole & Archi
 // @match        http://www.steamgifts.com/*
@@ -205,7 +205,7 @@ function giveawayDetails(giveaway_id) {
 
     $.get(TOUHOU_SITE + 'api/v1/getGiveawayDetails', {'id': giveaway_id}, function(data) {
         if (data.success) {
-            $('.featured__column--width-fill').after('<div class="featured__column' + (data.value > USER_DATA.points_allowed ? ' featured__column--contributor-level--negative' : ' featured__column--region-restricted') + '"><span title="TouhouValue: ' + data.value + '"><i class="fa fa-jpy"></i>' + data.value + (data.points * data.multiplier > data.value ? ' (-' +  Math.round((1 -(data.value/(data.points * data.multiplier))) * 100) + '%)' : '') + '</span></div>');
+            $('.featured__column--width-fill').after('<div class="featured__column' + (data.value > USER_DATA.points_allowed ? ' featured__column--contributor-level--negative' : ' featured__column--region-restricted') + '"><span title="TouhouValue: ' + data.value + '"><i class="fa fa-jpy"></i>' + data.value + (data.points * data.multiplier > data.value ? ' (-' + Math.round((1 - (data.value/(data.points * data.multiplier))) * 100) + '%)' : '') + '</span></div>');
         }
     });
 }
