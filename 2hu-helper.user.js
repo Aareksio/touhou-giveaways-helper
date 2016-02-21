@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Touhou Giveaways Helper
 // @namespace    https://touhou.justarchi.net/
-// @version      1.01
+// @version      1.011
 // @description  Makes your life easier!
 // @author       Mole & Archi
 // @match        http://www.steamgifts.com/*
@@ -33,6 +33,7 @@ if (/steamgifts\.com/.exec(window.location.href)) {
 
 if (current_path) {
     initializeTouhouHelper();
+    setTimeout(fixFuckups, 10);
 
     if (current_path.length === 0) { // Homepage
 
@@ -49,7 +50,7 @@ if (current_path) {
 
 /* Functions */
 function initializeTouhouHelper() {
-    let css = '.touhou_no_enter{background-image:linear-gradient(#FF6D5E 0,#FC6757 50%,#F25E4F 100%);background-image:-moz-linear-gradient(#FF6D5E 0,#FC6757 50%,#F25E4F 100%);background-image:-webkit-linear-gradient(#FF6D5E 0,#FC6757 50%,#F25E4F 100%);border-color:#FF5E41 #F14829 #EA3E1E #FF593A;color:rgba(135,13,0,.95);text-shadow:1px 1px 1px rgba(231,57,39,.5);box-shadow:none!important}';
+    let css = '.touhou_info_container{background-color:#1e202b;color:#c7c7c7;font:700 12px/22px Arial,sans-serif;border-top:1px solid;border-bottom:1px solid;border-color:#101015}.touhou_info_container_fixed{position:fixed;width:100%;z-index:1}';
     let head = document.getElementsByTagName('head')[0];
     if (!head) { return; }
     let style = document.createElement('style');
@@ -107,15 +108,15 @@ function updateTouhouGiveawaysData() {
 
 function appendTouhouBar(withData) {
     let touhouBar = '' +
-        '<div class="touhou_info_container" style="background-color: #1e202b;color: #c7c7c7;font: bold 12px/22px Arial,sans-serif;border-top: 1px solid;border-bottom: 1px solid;border-color: #101015;">' +
-        '<nav>' +
-        '<div class="nav__left-container">' +
-        '<p><a href="' + TOUHOU_SITE + '" target="_blank">Touhou Giveaways Helper</a></p>' +
-        '</div>' +
-        '<div class="nav__right-container">' +
-        generateTouhouData(withData) +
-        '</div>' +
-        '</nav>' +
+        '<div class="touhou_info_container">' +
+        '   <nav>' +
+        '       <div class="nav__left-container">' +
+        '           <p><a href="' + TOUHOU_SITE + '" target="_blank">Touhou Giveaways Helper</a></p>' +
+        '       </div>' +
+        '       <div class="nav__right-container">' +
+                    generateTouhouData(withData) +
+        '       </div>' +
+        '   </nav>' +
         '</div>';
     $('header').after(touhouBar);
 }
@@ -139,7 +140,7 @@ function updateTouhouGiveaways() {
         giveawayId = giveawayId[1];
 
         if (GIVEAWAYS_DATA.hasOwnProperty(giveawayId)) {
-            $('.giveaway__column--width-fill', giveaway).after('<div class="touhou_giveaway_points' + (GIVEAWAYS_DATA[giveawayId][0].value > USER_DATA.points_allowed ? ' touhou_no_enter' : '') + '"><span title="TouhouValue: ' + GIVEAWAYS_DATA[giveawayId][0].value + '"><i class="fa fa-jpy"></i>' + GIVEAWAYS_DATA[giveawayId][0].value + '</span></div>');
+            $('.giveaway__column--width-fill', giveaway).after('<div class="touhou_giveaway_points' + (GIVEAWAYS_DATA[giveawayId][0].value > USER_DATA.points_allowed ? ' giveaway__column--contributor-level--negative' : '') + '"><span title="TouhouValue: ' + GIVEAWAYS_DATA[giveawayId][0].value + '"><i class="fa fa-jpy"></i>' + GIVEAWAYS_DATA[giveawayId][0].value + '</span></div>');
         }
     });
 }
@@ -175,6 +176,13 @@ function giveawayNew() {
         applyGroup();
         applyDescription();
     });
+}
+
+function fixFuckups() {
+    console.log('Fixing fuckups!');
+    if ($('header').css('position') === 'fixed') {
+        $('.touhou_info_container').addClass('touhou_info_container_fixed');
+    }
 }
 
 /* Helpers */

@@ -1,0 +1,14 @@
+.touhou_info_container {
+    background-color: #1e202b;
+    color: #c7c7c7;
+    font: bold 12px/22px Arial, sans-serif;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    border-color: #101015;
+}
+
+.touhou_info_container_fixed {
+    position: fixed;
+    width: 100%;
+    z-index: 1;
+}
