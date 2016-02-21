@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Touhou Giveaways Helper
 // @namespace    https://touhou.justarchi.net/
-// @version      1.016
+// @version      1.017
 // @description  Makes your life easier!
 // @author       Mole & Archi
 // @match        http://www.steamgifts.com/*
@@ -33,7 +33,7 @@ if (/steamgifts\.com/.exec(window.location.href)) {
 
 if (current_path) {
     initializeTouhouHelper();
-    setTimeout(fixFuckups, 10);
+    fixFuckups();
 
     if (current_path.length === 0) { // Homepage
 
@@ -53,6 +53,8 @@ if (current_path) {
 
 /* Functions */
 function initializeTouhouHelper() {
+    $('body').addClass('touhou_giveaways_helper');
+
     let css = '.touhou_info_container{background-color:#1e202b;color:#c7c7c7;font:700 12px/22px Arial,sans-serif;border-top:1px solid;border-bottom:1px solid;border-color:#101015}.touhou_info_container_fixed{position:fixed;width:100%;z-index:1;top:39px}.touhou_pointer{cursor:pointer}';
     let head = document.getElementsByTagName('head')[0];
     if (!head) { return; }
@@ -182,9 +184,10 @@ function giveawayNew() {
     };
 
     let applyDescription = function() {
+        let descarea = $("textarea[name='description']");
         let description = '### TouhouValue: Default\n';
-        let newDesc = description + $("textarea[name='description']").val().replace(description, "");
-        $("textarea[name='description']").val(newDesc);
+        let newDesc = description + descarea.val().replace(description, "");
+        descarea.val(newDesc);
     };
 
     $("#dateBtn").click(function() {
@@ -202,16 +205,34 @@ function giveawayDetails(giveaway_id) {
 
     $.get(TOUHOU_SITE + 'api/v1/getGiveawayDetails', {'id': giveaway_id}, function(data) {
         if (data.success) {
-            $('.featured__column--width-fill').after('<div class="featured__column' + (data.value > USER_DATA.points_allowed ? ' featured__column--contributor-level--negative' : ' featured__column--region-restricted') + '"><span title="TouhouValue: ' + data.value + '"><i class="fa fa-jpy"></i>' + data.value + (data.points * data.multiplier > data.value ? ' (-' + (1 - Math.round(data.value/(data.points * data.multiplier))) * 100 + '%)' : '') + '</span></div>');
+            $('.featured__column--width-fill').after('<div class="featured__column' + (data.value > USER_DATA.points_allowed ? ' featured__column--contributor-level--negative' : ' featured__column--region-restricted') + '"><span title="TouhouValue: ' + data.value + '"><i class="fa fa-jpy"></i>' + data.value + (data.points * data.multiplier > data.value ? ' (-' +  Math.round((1 -(data.value/(data.points * data.multiplier))) * 100) + '%)' : '') + '</span></div>');
         }
     });
 }
 
 function fixFuckups() {
-    if ($('header').css('position') === 'fixed') {
-        $('.touhou_info_container').addClass('touhou_info_container_fixed');
-        $('body').css('padding-top', '25px');
-    }
+    let header = $('header');
+    let touhou_header = $('.touhou_info_container');
+
+    let fixExtendedSG = function() {
+        if (header.css('position') === 'fixed' ) {
+            touhou_header.addClass('touhou_info_container_fixed');
+            $('body').css('padding-top', '25px');
+        }
+    };
+
+    let fixSGPP = function() {
+        if (header.hasClass('SPGG_FixedNavbar')) {
+            if (!touhou_header.hasClass('touhou_info_container_fixed')) {
+                touhou_header.addClass('touhou_info_container_fixed');
+            }
+            touhou_header.css('z-index', 10);
+            $('body').css('padding-top', '63px');
+        }
+    };
+
+    setTimeout(fixExtendedSG, 10);
+    setTimeout(fixSGPP, 500); // 500ms, half a second before it loads, quality extension!
 }
 
 /* Helpers */
