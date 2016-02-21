@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Touhou Giveaways Helper
 // @namespace    https://touhou.justarchi.net/
-// @version      1.012
+// @version      1.015
 // @description  Makes your life easier!
 // @author       Mole & Archi
 // @match        http://www.steamgifts.com/*
@@ -53,7 +53,7 @@ if (current_path) {
 
 /* Functions */
 function initializeTouhouHelper() {
-    let css = '.touhou_info_container{background-color:#1e202b;color:#c7c7c7;font:700 12px/22px Arial,sans-serif;border-top:1px solid;border-bottom:1px solid;border-color:#101015}.touhou_info_container_fixed{position:fixed;width:100%;z-index:1; top:39px}';
+    let css = '.touhou_info_container{background-color:#1e202b;color:#c7c7c7;font:700 12px/22px Arial,sans-serif;border-top:1px solid;border-bottom:1px solid;border-color:#101015}.touhou_info_container_fixed{position:fixed;width:100%;z-index:1;top:39px}.touhou_pointer{cursor:pointer}';
     let head = document.getElementsByTagName('head')[0];
     if (!head) { return; }
     let style = document.createElement('style');
@@ -69,10 +69,15 @@ function initializeTouhouHelper() {
         appendTouhouBar(true);
         updateTouhouGiveaways();
     }
+
+    $(document).on('click', '.touhou_user_refresh', function() {
+        updateTouhouData(true);
+    });
 }
 
 function updateTouhouData(refreshID) {
     if (!USER_ID || refreshID) {
+        updateTouhouBar(generateTouhouData(false));
         let profileUrl = $('.nav__avatar-outer-wrap').first().attr('href');
         if (profileUrl) {
             $.get(profileUrl, function(page) {
@@ -82,9 +87,15 @@ function updateTouhouData(refreshID) {
                     updateTouhouUserData();
                     updateTouhouGiveawaysData();
                 } else {
-                    updateTouhouBar('Cannot load steam id...');
+                    updateTouhouBar('Cannot load steam id...&nbsp;&nbsp;<i class="touhou_user_refresh touhou_pointer fa fa-refresh"></i>');
                 }
             });
+        } else {
+            updateTouhouBar('Not logged in...&nbsp;&nbsp;<i class="touhou_user_refresh touhou_pointer fa fa-refresh"></i>');
+            localStorage.removeItem('touhou_user_id');
+            localStorage.removeItem('touhou_user_data');
+            localStorage.removeItem('touhou_last_updated');
+            localStorage.removeItem('touhou_giveaways_data');
         }
     } else {
         updateTouhouUserData();
@@ -98,6 +109,8 @@ function updateTouhouUserData() {
         LAST_UPDATED = Date.now();
         saveUserData();
         updateTouhouBar();
+    }).fail(function() {
+        updateTouhouBar('Cannot load user data...&nbsp;&nbsp;<i class="touhou_user_refresh touhou_pointer fa fa-refresh"></i>');
     });
 }
 
@@ -143,7 +156,7 @@ function updateTouhouGiveaways() {
         giveawayId = giveawayId[1];
 
         if (GIVEAWAYS_DATA.hasOwnProperty(giveawayId)) {
-            $('.giveaway__column--width-fill', giveaway).after('<div class="touhou_giveaway_points' + (GIVEAWAYS_DATA[giveawayId][0].value > USER_DATA.points_allowed ? ' giveaway__column--contributor-level--negative' : ' giveaway__column--region-restricted') + '"><span title="TouhouValue: ' + GIVEAWAYS_DATA[giveawayId][0].value + '"><i class="fa fa-jpy"></i>' + GIVEAWAYS_DATA[giveawayId][0].value + '</span></div>');
+            $('.giveaway__column--width-fill', giveaway).after('<div class="touhou_giveaway_points' + (GIVEAWAYS_DATA[giveawayId][0].value > USER_DATA.points_allowed ? ' giveaway__column--contributor-level--negative' : ' giveaway__column--region-restricted') + '"><span title="TouhouValue: ' + GIVEAWAYS_DATA[giveawayId][0].value + '"><i class="fa fa-jpy"></i>' + GIVEAWAYS_DATA[giveawayId][0].value + (GIVEAWAYS_DATA[giveawayId][0].points * GIVEAWAYS_DATA[giveawayId][0].multiplier > GIVEAWAYS_DATA[giveawayId][0].value ? ' (-' + Math.round((1 - (GIVEAWAYS_DATA[giveawayId][0].value/(GIVEAWAYS_DATA[giveawayId][0].points * GIVEAWAYS_DATA[giveawayId][0].multiplier))) * 100) + '%)' : '') + '</span></div>');
         }
     });
 }
@@ -188,7 +201,7 @@ function giveawayDetails(giveaway_id) {
 
     $.get(TOUHOU_SITE + 'api/v1/getGiveawayDetails', {'id': giveaway_id}, function(data) {
         if (data.success) {
-            $('.featured__column--width-fill').after('<div class="featured__column' + (data.value > USER_DATA.points_allowed ? ' featured__column--contributor-level--negative' : ' featured__column--region-restricted') + '"><span title="TouhouValue: ' + data.value + '"><i class="fa fa-jpy"></i>' + data.value + '</span></div>');
+            $('.featured__column--width-fill').after('<div class="featured__column' + (data.value > USER_DATA.points_allowed ? ' featured__column--contributor-level--negative' : ' featured__column--region-restricted') + '"><span title="TouhouValue: ' + data.value + '"><i class="fa fa-jpy"></i>' + data.value + (data.points * data.multiplier > data.value ? ' (-' + (1 - Math.round(data.value/(data.points * data.multiplier))) * 100 + '%)' : '') + '</span></div>');
         }
     });
 }
@@ -252,9 +265,9 @@ function saveGiveawaysData() {
 function generateTouhouData(withData) {
     let touhouData = '<p class="touhou_data">';
     if (withData) {
-        touhouData += '<b><a href="' + TOUHOU_SITE + 'user/' + USER_ID + '/profile" target="_blank">' + USER_DATA.nickname + '</a></b> (<i class="fa fa-jpy"></i>' + USER_DATA.points_allowed + ')';
+        touhouData += '<b><a href="' + TOUHOU_SITE + 'user/' + USER_ID + '/profile" target="_blank">' + USER_DATA.nickname + '</a></b> (<i class="fa fa-jpy"></i>' + USER_DATA.points_allowed + ')&nbsp;&nbsp;<i class="touhou_user_refresh touhou_pointer fa fa-refresh"></i>';
     } else {
-        touhouData += 'Loading data...';
+        touhouData += 'Loading data...&nbsp;&nbsp;<i class="fa fa-refresh fa-spin"></i>';
     }
     touhouData += '</p>';
 
