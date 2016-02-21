@@ -44,6 +44,9 @@ if (current_path) {
                     giveawayNew();
                 }
                 break;
+            case 'giveaway':
+                giveawayDetails(current_path[1]);
+                break;
         }
     }
 }
@@ -178,8 +181,19 @@ function giveawayNew() {
     });
 }
 
+function giveawayDetails(giveaway_id) {
+    if (!giveaway_id) {
+        return;
+    }
+
+    $.get(TOUHOU_SITE + 'api/v1/getGiveawayDetails', {'id': giveaway_id}, function(data) {
+        if (data.success) {
+            $('.featured__column--width-fill').after('<div class="featured__column' + (data.value > USER_DATA.points_allowed ? ' featured__column--contributor-level--negative' : ' featured__column--region-restricted') + '"><span title="TouhouValue: ' + data.value + '"><i class="fa fa-jpy"></i>' + data.value + '</span></div>');
+        }
+    });
+}
+
 function fixFuckups() {
-    console.log('Fixing fuckups!');
     if ($('header').css('position') === 'fixed') {
         $('.touhou_info_container').addClass('touhou_info_container_fixed');
         $('body').css('padding-top', '25px');
