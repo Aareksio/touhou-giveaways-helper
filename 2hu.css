@@ -14,6 +14,13 @@
     top: 39px;
 }
 
+.SGPP__gridTileIcons > .touhou_giveaway_points {
+    width: auto;
+    padding-right: 8px !important;
+    padding-left: 8px;
+    line-height: 1.5;
+}
+
 .touhou_pointer {
     cursor: pointer;
 }

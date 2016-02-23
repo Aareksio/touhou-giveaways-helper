@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Touhou Giveaways Helper
 // @namespace    https://touhou.justarchi.net/
-// @version      1.018
+// @version      1.019
 // @description  Makes your life easier!
 // @author       Mole & Archi
 // @match        http://www.steamgifts.com/*
@@ -10,6 +10,16 @@
 // ==/UserScript==
 
 'use strict';
+
+/* Customization */
+
+// Links - add your own links to the bar! Uncomment (remove initial '//') examples below to see how it works.
+var CUSTOM_LINKS = [
+    //['My animu and mango', 'http://4chan.org/a/'],
+    //['Google', 'http://google.com/'],
+];
+
+/* END */
 
 var GROUP_ID = 11587332;
 var TOUHOU_SITE = 'https://touhou.justarchi.net/';
@@ -55,14 +65,8 @@ if (current_path) {
 function initializeTouhouHelper() {
     $('body').addClass('touhou_giveaways_helper');
 
-    let css = '.touhou_info_container{background-color:#1e202b;color:#c7c7c7;font:700 12px/22px Arial,sans-serif;border-top:1px solid;border-bottom:1px solid;border-color:#101015}.touhou_info_container_fixed{position:fixed;width:100%;z-index:1;top:39px}.touhou_pointer{cursor:pointer}';
-    let head = document.getElementsByTagName('head')[0];
-    if (!head) { return; }
-    let style = document.createElement('style');
-    style.type = 'text/css';
-    style.classList.add('touhou_style');
-    style.innerHTML = css;
-    head.appendChild(style);
+    let css = '.touhou_info_container{background-color:#1e202b;color:#c7c7c7;font:700 12px/22px Arial,sans-serif;border-top:1px solid;border-bottom:1px solid;border-color:#101015}.touhou_info_container_fixed{position:fixed;width:100%;z-index:1;top:39px}.SGPP__gridTileIcons>.touhou_giveaway_points{width:auto;padding-right:8px!important;padding-left:8px;line-height:1.5}.touhou_pointer{cursor:pointer}';
+    addStyle(css);
 
     if (!LAST_UPDATED || !USER_DATA || !GIVEAWAYS_DATA || LAST_UPDATED < (Date.now() - (15 * 60 * 1000))) {
         appendTouhouBar(false);
@@ -125,11 +129,20 @@ function updateTouhouGiveawaysData() {
 }
 
 function appendTouhouBar(withData) {
+
+    let customLinks = '';
+    for (let i in CUSTOM_LINKS) {
+        if (CUSTOM_LINKS.hasOwnProperty(i)) {
+            customLinks += '<p>&nbsp;&nbsp;||&nbsp;&nbsp;<a href="' + CUSTOM_LINKS[i][1] + '" target="_blank">' + CUSTOM_LINKS[i][0] + '</a></p>';
+        }
+    }
+
     let touhouBar = '' +
         '<div class="touhou_info_container">' +
         '   <nav>' +
         '       <div class="nav__left-container">' +
         '           <p><a href="' + TOUHOU_SITE + '" target="_blank">Touhou Giveaways Helper</a></p>' +
+                    customLinks +
         '       </div>' +
         '       <div class="nav__right-container">' +
                     generateTouhouData(withData) +
@@ -165,7 +178,7 @@ function updateTouhouGiveaways() {
 }
 
 function giveawayNew() {
-    $(".form__row--giveaway-keys").after('<div class="form__row"><div class="form__heading"><div class="form__heading__number">3a.</div><div class="form__heading__text">Touhou Giveaways</div></div><div class="form__row__indent"><div id="dateBtn" class="form__submit-button"><i class="fa fa-fast-forward"></i>&nbsp;Fill with default Touhou Giveaways settings</div></div></div>');
+    $(".form__row--giveaway-keys").after('<div class="form__row"><div class="form__heading"><div class="form__heading__number">3a.</div><div class="form__heading__text">Group Giveaways</div></div><div class="form__row__indent"><div class="form__submit-button touhouBtn"><i class="fa fa-fast-forward"></i>&nbsp;Touhou</div>&nbsp;<div class="form__submit-button touhouBtn js__submit-form"><i class="fa fa-fast-forward"></i>&nbsp;Touhou and confirm</div></div></div>');
 
     let applyDates = function() {
         let startingDate = new Date().getTime();
@@ -190,7 +203,7 @@ function giveawayNew() {
         descarea.val(newDesc);
     };
 
-    $("#dateBtn").click(function() {
+    $(".touhouBtn").click(function() {
         applyDates();
         applyRegionRestrictions();
         applyGroup();
@@ -287,11 +300,20 @@ function saveGiveawaysData() {
 function generateTouhouData(withData) {
     let touhouData = '<p class="touhou_data">';
     if (withData) {
-        touhouData += '<b><a href="' + TOUHOU_SITE + 'user/' + USER_ID + '/profile" target="_blank">' + USER_DATA.nickname + '</a></b> (<i class="fa fa-jpy"></i>' + USER_DATA.points_allowed + ')&nbsp;&nbsp;<i class="touhou_user_refresh touhou_pointer fa fa-refresh"></i>';
+        touhouData += '<b><a href="' + TOUHOU_SITE + 'user/' + USER_ID + '/profile" target="_blank">' + USER_DATA.nickname + '</a></b> (<i class="fa fa-jpy"></i>' + USER_DATA.points_allowed + ') &nbsp;&nbsp;<i class="touhou_user_refresh touhou_pointer fa fa-refresh"></i>';
     } else {
         touhouData += 'Loading data...&nbsp;&nbsp;<i class="fa fa-refresh fa-spin"></i>';
     }
     touhouData += '</p>';
 
     return touhouData;
+}
+
+function addStyle(css) {
+    let style = $('.touhou_style');
+    if (style.length) {
+        style.html(style.html() + css);
+    } else {
+        $('head').append('<style class="touhou_style" type="text/css">' + css + '</style>');
+    }
 }
