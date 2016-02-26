@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Touhou Giveaways Helper
 // @namespace    https://touhou.justarchi.net/
-// @version      1.019
+// @version      1.022
 // @description  Makes your life easier!
 // @author       Mole & Archi
 // @match        http://www.steamgifts.com/*
@@ -12,6 +12,9 @@
 'use strict';
 
 /* Customization */
+
+// Default giveaway time (in milliseconds, time before the giveaways ends, one hour will be added to prevent SG fuckups)
+var TOUHOU_TIME = 2 * 24 * 60 * 60 * 1000; // 2 days recommended
 
 // Links - add your own links to the bar! Uncomment (remove initial '//') examples below to see how it works.
 var CUSTOM_LINKS = [
@@ -56,8 +59,7 @@ if (current_path) {
                 break;
             case 'giveaway':
                 giveawayDetails(current_path[1]);
-                break;
-        }
+                break;        }
     }
 }
 
@@ -142,10 +144,10 @@ function appendTouhouBar(withData) {
         '   <nav>' +
         '       <div class="nav__left-container">' +
         '           <p><a href="' + TOUHOU_SITE + '" target="_blank">Touhou Giveaways Helper</a></p>' +
-                    customLinks +
+        customLinks +
         '       </div>' +
         '       <div class="nav__right-container">' +
-                    generateTouhouData(withData) +
+        generateTouhouData(withData) +
         '       </div>' +
         '   </nav>' +
         '</div>';
@@ -181,10 +183,10 @@ function giveawayNew() {
     $(".form__row--giveaway-keys").after('<div class="form__row"><div class="form__heading"><div class="form__heading__number">3a.</div><div class="form__heading__text">Group Giveaways</div></div><div class="form__row__indent"><div class="form__submit-button touhouBtn"><i class="fa fa-fast-forward"></i>&nbsp;Touhou</div>&nbsp;<div class="form__submit-button touhouBtn js__submit-form"><i class="fa fa-fast-forward"></i>&nbsp;Touhou and confirm</div></div></div>');
 
     let applyDates = function() {
-        let startingDate = new Date().getTime();
-        let endingDate = startingDate + (2 * 24 * 60 * 60 * 1000) + (60 * 60 * 1000); // 2 days + 1 hour
-        $("input[name='start_time']").val(formatDate(new Date(startingDate)));
-        $("input[name='end_time']").val(formatDate(new Date(endingDate)));
+        let startingDate = new Date();
+        let endingDate = new Date(startingDate.getTime() + TOUHOU_TIME + (60 * 60 * 1000)); // Extra 1 hour
+        $("input[name='start_time']").val(formatDate(startingDate));
+        $("input[name='end_time']").val(formatDate(endingDate));
     };
 
     let applyRegionRestrictions = function() {
@@ -259,9 +261,8 @@ function removeFromArray(arr, item) {
 
 function formatDate(date) {
     // Fixed by Archi for all SG weird dates, do not touch
-    let formattedDate = $.datepicker.formatDate('M d, yy', date);
 
-    // Hours
+    // Fix hours
     let hours = date.getHours();
     let ampm = '';
     if (hours < 12) {
@@ -276,15 +277,14 @@ function formatDate(date) {
         }
     }
 
-    // Minutes
+    // Fix minutes
     let minutes = date.getMinutes();
     if (minutes < 10) {
         minutes = '0' + minutes;
     }
 
-    // Result
-    formattedDate += " " + hours + ":" + minutes + " " + ampm;
-    return formattedDate;
+    // Return result
+    return $.datepicker.formatDate('M d, yy', date) + " " + hours + ":" + minutes + " " + ampm;
 }
 
 function saveUserData() {
