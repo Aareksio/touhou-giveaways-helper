@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Touhou Giveaways Helper
 // @namespace    https://touhou.justarchi.net/
-// @version      1.024
+// @version      1.025
 // @description  Makes your life easier!
 // @author       Mole & Archi
 // @match        http://www.steamgifts.com/*
@@ -51,7 +51,7 @@ if (current_path) {
     if (current_path.length === 0) { // Homepage
 
     } else {
-        switch(current_path[0]) {
+        switch (current_path[0]) {
             case 'giveaways': // Giveaways page
                 if (current_path[1] === 'new') { // New giveaway
                     giveawayNew();
@@ -59,7 +59,8 @@ if (current_path) {
                 break;
             case 'giveaway':
                 giveawayDetails(current_path[1]);
-                break;        }
+                break;
+        }
     }
 }
 
@@ -75,7 +76,7 @@ function initializeTouhouHelper() {
         updateTouhouData();
     } else {
         appendTouhouBar(true);
-        updateTouhouGiveaways();
+        updateTouhouGiveaways(true);
     }
 
     $(document).on('click', '.touhou_user_refresh', function() {
@@ -126,7 +127,7 @@ function updateTouhouGiveawaysData() {
     $.get(TOUHOU_SITE + 'api/v1/getActiveGiveaways', function(data) {
         GIVEAWAYS_DATA = data;
         saveGiveawaysData();
-        updateTouhouGiveaways();
+        updateTouhouGiveaways(true);
     });
 }
 
@@ -164,19 +165,27 @@ function updateTouhouBar(msg) {
     $('.touhou_data').first().html(status);
 }
 
-function updateTouhouGiveaways() {
-    $('.giveaway__row-outer-wrap').each(function(index, giveaway) {
-        let giveawayId = /\/giveaway\/([A-Za-z0-9]+)\//.exec($('.giveaway__heading__name', giveaway).attr('href'));
-        if (!giveawayId) {
-            return;
-        }
-        giveawayId = giveawayId[1];
+function updateTouhouGiveaways(endless) {
+    let updater = function() {
+        $('.giveaway__row-outer-wrap').each(function(index, giveaway) {
+            let giveawayId = /\/giveaway\/([A-Za-z0-9]+)\//.exec($('.giveaway__heading__name', giveaway).attr('href'));
+            if (!giveawayId) {
+                return;
+            }
+            giveawayId = giveawayId[1];
 
-        if (GIVEAWAYS_DATA.hasOwnProperty(giveawayId)) {
-            $('.touhou_giveaway_points', giveaway).remove();
-            $('.giveaway__column--width-fill', giveaway).after('<div class="touhou_giveaway_points' + (GIVEAWAYS_DATA[giveawayId][0].value > USER_DATA.points_allowed ? ' giveaway__column--contributor-level--negative' : ' giveaway__column--region-restricted') + '"><span title="TouhouValue: ' + GIVEAWAYS_DATA[giveawayId][0].value + '"><i class="fa fa-jpy"></i>' + GIVEAWAYS_DATA[giveawayId][0].value + (GIVEAWAYS_DATA[giveawayId][0].points * GIVEAWAYS_DATA[giveawayId][0].multiplier > GIVEAWAYS_DATA[giveawayId][0].value ? ' (-' + Math.round((1 - (GIVEAWAYS_DATA[giveawayId][0].value/(GIVEAWAYS_DATA[giveawayId][0].points * GIVEAWAYS_DATA[giveawayId][0].multiplier))) * 100) + '%)' : '') + '</span></div>');
-        }
-    });
+            if (GIVEAWAYS_DATA.hasOwnProperty(giveawayId)) {
+                $('.touhou_giveaway_points', giveaway).remove();
+                $('.giveaway__column--width-fill', giveaway).after('<div class="touhou_giveaway_points' + (GIVEAWAYS_DATA[giveawayId][0].value > USER_DATA.points_allowed ? ' giveaway__column--contributor-level--negative' : ' giveaway__column--region-restricted') + '"><span title="TouhouValue: ' + GIVEAWAYS_DATA[giveawayId][0].value + '"><i class="fa fa-jpy"></i>' + GIVEAWAYS_DATA[giveawayId][0].value + (GIVEAWAYS_DATA[giveawayId][0].points * GIVEAWAYS_DATA[giveawayId][0].multiplier > GIVEAWAYS_DATA[giveawayId][0].value ? ' (-' + Math.round((1 - (GIVEAWAYS_DATA[giveawayId][0].value / (GIVEAWAYS_DATA[giveawayId][0].points * GIVEAWAYS_DATA[giveawayId][0].multiplier))) * 100) + '%)' : '') + '</span></div>');
+            }
+        });
+    };
+
+    updater();
+
+    if (endless) {
+        setInterval(updater, 1000);
+    }
 }
 
 function giveawayNew() {
@@ -223,7 +232,7 @@ function giveawayDetails(giveaway_id) {
 
     $.get(TOUHOU_SITE + 'api/v1/getGiveawayDetails', {'id': giveaway_id}, function(data) {
         if (data.success) {
-            $('.featured__column--width-fill').after('<div class="touhou_giveaway_points featured__column' + (data.value > USER_DATA.points_allowed ? ' featured__column--contributor-level--negative' : ' featured__column--region-restricted') + '"><span title="TouhouValue: ' + data.value + '"><i class="fa fa-jpy"></i>' + data.value + (data.points * data.multiplier > data.value ? ' (-' + Math.round((1 - (data.value/(data.points * data.multiplier))) * 100) + '%)' : '') + '</span></div>');
+            $('.featured__column--width-fill').after('<div class="touhou_giveaway_points featured__column' + (data.value > USER_DATA.points_allowed ? ' featured__column--contributor-level--negative' : ' featured__column--region-restricted') + '"><span title="TouhouValue: ' + data.value + '"><i class="fa fa-jpy"></i>' + data.value + (data.points * data.multiplier > data.value ? ' (-' + Math.round((1 - (data.value / (data.points * data.multiplier))) * 100) + '%)' : '') + '</span></div>');
         }
     });
 }
@@ -233,7 +242,7 @@ function fixFuckups() {
     let touhou_header = $('.touhou_info_container');
 
     let fixExtendedSG = function() {
-        if (header.css('position') === 'fixed' ) {
+        if (header.css('position') === 'fixed') {
             touhou_header.addClass('touhou_info_container_fixed');
             $('body').css('padding-top', '25px');
         }
