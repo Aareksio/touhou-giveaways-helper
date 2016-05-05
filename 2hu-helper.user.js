@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Touhou Giveaways Helper
 // @namespace    https://touhou.justarchi.net/
-// @version      1.025
+// @version      1.028
 // @description  Makes your life easier!
 // @author       Mole & Archi
-// @match        http://www.steamgifts.com/*
+// @match        https://www.steamgifts.com/*
 // @grant        none
 // @run-at       document-end
 // ==/UserScript==
@@ -217,6 +217,10 @@ function giveawayNew() {
         descarea.val(newDesc);
     };
 
+    $(".js__submit-form").click(function() {
+        return $(this).closest("form").submit();
+    });
+
     $(".touhouBtn").click(function() {
         applyDates();
         applyRegionRestrictions();
@@ -226,9 +230,7 @@ function giveawayNew() {
 }
 
 function giveawayDetails(giveaway_id) {
-    if (!giveaway_id) {
-        return;
-    }
+    if (!giveaway_id || !GIVEAWAYS_DATA.hasOwnProperty(giveaway_id)) return;
 
     $.get(TOUHOU_SITE + 'api/v1/getGiveawayDetails', {'id': giveaway_id}, function(data) {
         if (data.success) {
@@ -256,10 +258,12 @@ function fixFuckups() {
             touhou_header.css('z-index', 10);
             $('body').css('padding-top', '63px');
         }
+
+        $('img[src="https://raw.githubusercontent.com/nandee95/Extended_Steamgifts/master/img/logo_trans.png"]', touhou_header).remove(); // Don't touch Touhou Bar, kay?
     };
 
     setTimeout(fixExtendedSG, 10);
-    setTimeout(fixSGPP, 500); // 500ms, half a second before it loads, quality extension!
+    setTimeout(fixSGPP, 500); // 500ms, half a second before it loads!
 }
 
 /* Helpers */
