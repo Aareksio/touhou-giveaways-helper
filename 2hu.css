@@ -24,3 +24,15 @@
 .touhou_pointer {
     cursor: pointer;
 }
+
+.touhou_announcement {
+    margin-left: 15px;
+}
+
+.touhou_announcement a {
+    color: red;
+}
+
+.touhou_announcement .touhou_announcement_ignore {
+    color: #c7c7c7;
+}
