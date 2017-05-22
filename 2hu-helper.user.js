@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Touhou Giveaways Helper
 // @namespace    https://touhou.justarchi.net/
-// @version      1.030
+// @version      1.031
 // @description  Makes your life easier!
 // @author       Mole & Archi
 // @match        https://www.steamgifts.com/*
@@ -325,14 +325,14 @@ function fixFuckups() {
     let header = $('header');
     let touhou_header = $('.touhou_info_container');
 
-    let fixExtendedSG = function() {
+    const fixExtendedSG = function() {
         if (header.css('position') === 'fixed') {
             touhou_header.addClass('touhou_info_container_fixed');
             $('body').css('padding-top', '25px');
         }
     };
 
-    let fixSGPP = function() {
+    const fixSGPP = function() {
         if (header.hasClass('SPGG_FixedNavbar')) {
             if (!touhou_header.hasClass('touhou_info_container_fixed')) {
                 touhou_header.addClass('touhou_info_container_fixed');
@@ -344,8 +344,16 @@ function fixFuckups() {
         $('img[src="https://raw.githubusercontent.com/nandee95/Extended_Steamgifts/master/img/logo_trans.png"]', touhou_header).remove();
     };
 
+    const fixESGST = function() {
+        if (header.hasClass('esgst-fh')) {
+            touhou_header.css('z-index', 998);
+            $('.esgst-fh-sibling').css('margin-top', '37px');
+        }
+    };
+
     setTimeout(fixExtendedSG, 10);
     setTimeout(fixSGPP, 500);
+    setTimeout(fixESGST, 500);
 }
 
 /* Helpers */
