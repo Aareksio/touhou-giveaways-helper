@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Touhou Giveaways Helper
 // @namespace    https://touhou.justarchi.net/
-// @version      1.029
+// @version      1.030
 // @description  Makes your life easier!
 // @author       Mole & Archi
 // @match        https://www.steamgifts.com/*
@@ -294,7 +294,7 @@ function giveawayNew() {
         descarea.val(newDesc);
     };
 
-    $(".js__submit-form").click(function() {
+    $(".js__submit-form.touhouBtn").click(function() {
         return $(this).closest("form").submit();
     });
 
